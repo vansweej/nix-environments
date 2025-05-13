@@ -109,7 +109,7 @@ let
 
         # By default gcc-wrapper will compile executables that specify a dynamic loader that will ignore the FHS
         # ld-config causing unexpected libraries to be loaded when when the executable is run.
-        export NIX_DYNAMIC_LINKER_${pkgs.stdenv.cc.suffixSalt}="/lib/ld-linux-x86-64.so.2"
+        export NIX_DYNAMIC_LINKER_${pkgs.stdenv.cc.suffixSalt}="/lib/ld-linux-aarch64.so.1"
 
         # These are set by buildFHSEnvBubblewrap
         export BB_ENV_PASSTHROUGH_ADDITIONS="${lib.strings.concatStringsSep " " passthroughVars}"

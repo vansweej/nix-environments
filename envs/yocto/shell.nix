@@ -57,6 +57,10 @@ let
       bison
       flex
       pkg-config
+      texinfo
+      openssh
+      pipenv
+      kas
     ] ++ (with pkgs.xorg; [
       libX11
       libXext
@@ -116,6 +120,7 @@ let
 
         # source the config for bibake equal to --postread
         export BBPOSTCONF="${nixconf}"
+
       '';
   };
 in

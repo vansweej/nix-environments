@@ -12,6 +12,10 @@
       configureFlags = old.configureFlags ++ [ "--with-termlib" ];
       postFixup = "";
     });
+    ncurses6' = ncurses6.overrideAttrs (old: {
+      configureFlags = old.configureFlags ++ [ "--with-termlib" ];
+      postFixup = "";
+    });
   in
   [
     bash
@@ -24,6 +28,8 @@
     # in buildFHSEnv, we just install both variants
     ncurses'
     (ncurses'.override { unicodeSupport = false; })
+    ncurses6'
+    (ncurses6'.override { unicodeSupport = false; })
     xorg.libXext
     xorg.libX11
     xorg.libXrender
@@ -31,7 +37,10 @@
     xorg.libXi
     xorg.libXft
     xorg.libxcb
-    xorg.libxcb
+    xorg.libXcomposite
+    xorg.libXdamage
+    xorg.libXfixes
+    xorg.libXrandr
     # common requirements
     freetype
     fontconfig
@@ -40,6 +49,33 @@
     gtk3
     libxcrypt-legacy # required for Vivado
     python3
+
+    libuuid
+    pixman
+    libpng
+    git
+    gdb
+    nss
+    nspr
+    dbus
+    at-spi2-atk
+    cups
+    libdrm
+    pango
+    cairo
+    libgbm
+    expat
+    libxkbcommon
+    alsa-lib
+    libglvnd
+    sqlite
+    gmp
+    zstd
+    libffi
+    libsecret
+    libxkbfile
+    libyaml
+    libudev0-shim
 
     (libidn.overrideAttrs (_old: {
       # we need libidn.so.11 but nixpkgs has libidn.so.12

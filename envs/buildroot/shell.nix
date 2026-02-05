@@ -2,7 +2,7 @@
   pkgs ? import <nixpkgs> {},
   extraPkgs ? [],
 }: let
-  # POSIX compliant gcc wrappers for backwards compatiblity
+  # POSIX compliant gcc wrappers for backwards compatibility
   # https://gitlab.archlinux.org/archlinux/packaging/packages/gcc/-/commit/cacf18c7cd79fb00645a4bf367392b05ad2dc290
   # Small change: last line was '${1+"$@"}' which throws causes nix
   # to throw an error: add not allowed for integer and string

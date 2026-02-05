@@ -1,11 +1,7 @@
 {
-  # Unstable is required as stable does not contain required glib
-  pkgs ? import (fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/refs/heads/nixpkgs-unstable.tar.gz"; # TODO: Remove unstable override, when we have 24.11
-  }) { }
-, extraPkgs ? []
-}:
-let
+  pkgs ? import <nixpkgs> {},
+  extraPkgs ? [],
+}: let
   # POSIX compliant gcc wrappers for backwards compatiblity
   # https://gitlab.archlinux.org/archlinux/packaging/packages/gcc/-/commit/cacf18c7cd79fb00645a4bf367392b05ad2dc290
   # Small change: last line was '${1+"$@"}' which throws causes nix
@@ -65,7 +61,7 @@ in
       gnutar
       gzip
       libxcrypt # not mentioned in buildroot deps; required for host-mkpasswd
-      ncurses # optional
+      ncurses.dev
       patch
       perl
       pkg-config # not mentioned, unsure if necessary

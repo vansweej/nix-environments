@@ -1,26 +1,27 @@
 { pkgs ? import <nixpkgs> { }
+, stdenv ? pkgs.stdenv
+, python3 ? pkgs.python3
 , extraPkgs ? [ ]
 , extraPythonPkgs ? [ ]
 , shellHookPost ? ""
 }:
 
 let
+  ncurses' = pkgs.ncurses5.overrideAttrs
+    (old: {
+      configureFlags = old.configureFlags ++ [ "--with-termlib" ];
+      postFixup = "";
+    });
+  lz4' = pkgs.lz4.overrideAttrs
+    (old: {
+      postInstall = ''
+        ln -rs $out/bin/lz4 $out/bin/lz4c
+      '';
+    });
+  pythonWithPkgs = python3.withPackages (ps: [ ps.setuptools ps.pyaml ps.websockets ] ++ extraPythonPkgs);
   fhs = pkgs.buildFHSEnvBubblewrap {
     name = "yocto-fhs";
-    targetPkgs = pkgs: with pkgs; let
-      ncurses' = pkgs.ncurses5.overrideAttrs
-        (old: {
-          configureFlags = old.configureFlags ++ [ "--with-termlib" ];
-          postFixup = "";
-        });
-      lz4' = pkgs.lz4.overrideAttrs
-        (old: {
-          postInstall = ''
-            ln -rs $out/bin/lz4 $out/bin/lz4c
-          '';
-        });
-    in
-    (with pkgs; [
+    targetPkgs = pkgs: with pkgs; [
       attr
       bc
       binutils
@@ -30,7 +31,7 @@ let
       diffstat
       expect
       file
-      gcc
+      stdenv.cc
       gdb
       git
       gnumake
@@ -47,7 +48,7 @@ let
       openssh
       patch
       perl
-      (python3.withPackages (ps: [ ps.setuptools ps.pyaml ps.websockets ] ++ extraPythonPkgs))
+      pythonWithPkgs
       rpcsvc-proto
       unzip
       util-linux
@@ -66,7 +67,7 @@ let
       libXi
       libXtst
       libxcb
-    ]) ++ extraPkgs);
+    ]) ++ extraPkgs;
     multiPkgs = ps: [ ];
     extraOutputsToInstall = [ "dev" ];
     profile =
@@ -79,11 +80,11 @@ let
 
         exportVars = [
           "LOCALE_ARCHIVE"
-          "NIX_CC_WRAPPER_TARGET_HOST_${pkgs.stdenv.cc.suffixSalt}"
+          "NIX_CC_WRAPPER_TARGET_HOST_${stdenv.cc.suffixSalt}"
           "NIX_CFLAGS_COMPILE"
           "NIX_CFLAGS_LINK"
           "NIX_LDFLAGS"
-          "NIX_DYNAMIC_LINKER_${pkgs.stdenv.cc.suffixSalt}"
+          "NIX_DYNAMIC_LINKER_${stdenv.cc.suffixSalt}"
         ];
 
         exports =
@@ -111,7 +112,7 @@ let
 
         # By default gcc-wrapper will compile executables that specify a dynamic loader that will ignore the FHS
         # ld-config causing unexpected libraries to be loaded when when the executable is run.
-        export NIX_DYNAMIC_LINKER_${pkgs.stdenv.cc.suffixSalt}=${
+        export NIX_DYNAMIC_LINKER_${stdenv.cc.suffixSalt}=${
         if pkgs.stdenv.isx86_64 then
           "/lib/ld-linux-x86-64.so.2"
         else if pkgs.stdenv.isAarch64 then

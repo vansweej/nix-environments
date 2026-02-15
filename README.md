@@ -69,18 +69,34 @@ in (phoronix.overrideAttrs (old: {
 }))
 ```
 
-To provide additional packages to buildFHSEnv-based environments you can use the `extraPkgs` attribute and `import` 
-the shell file directly:
+To provide additional packages to buildFHSEnv-based environments you can use the `extraPkgs` attribute.
+For the Yocto environment, you can use `callPackage` to override `stdenv` or `python3`:
 
 ```nix
 {pkgs ? import <nixpkgs> {}}: 
 let
-  yoctoEnv = ((builtins.fetchTarball {
+  yoctoEnv = pkgs.callPackage ((builtins.fetchTarball {
+      url = "https://github.com/nix-community/nix-environments/archive/master.tar.gz";
+    }) + "/envs/yocto/shell.nix") {
+    stdenv = pkgs.gcc11Stdenv;  # Use GCC 11 for older Yocto releases
+    python3 = pkgs.python311;   # Use Python 3.11 for older Yocto releases
+    extraPkgs = [pkgs.hello];
+  };
+in
+  yoctoEnv
+```
+
+For other environments, you can still use the traditional import method:
+
+```nix
+{pkgs ? import <nixpkgs> {}}: 
+let
+  buildrootEnv = ((builtins.fetchTarball {
       url = "https://github.com/nix-community/nix-environments/archive/master.tar.gz";
     })
-    + "/envs/yocto/shell.nix");
+    + "/envs/buildroot/shell.nix");
 in
-  (import yoctoEnv) {
+  (import buildrootEnv) {
     inherit pkgs;
     extraPkgs = [pkgs.hello];
   }
@@ -113,6 +129,25 @@ You can also use these environments in your own flake and extend them:
       in nix-environments.devShells.${system}.phoronix-test-suite.overrideAttrs (old: {
         buildInputs = old.buildInputs ++ [ pkgs.python3 ];
       });
+  };
+}
+```
+
+For the Yocto environment, you can also override parameters like `stdenv` and `python3`:
+
+```nix
+{
+  inputs.nix-environments.url = "github:nix-community/nix-environments";
+
+  outputs = { self, nixpkgs, nix-environments }: let
+    system = "x86_64-linux";
+    pkgs = import nixpkgs { inherit system; };
+  in {
+    devShells.${system}.default = 
+      nix-environments.devShells.${system}.yocto.override {
+        stdenv = pkgs.gcc11Stdenv;
+        python3 = pkgs.python311;
+      };
   };
 }
 ```

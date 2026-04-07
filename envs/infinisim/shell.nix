@@ -14,6 +14,6 @@ pkgs.mkShell {
     (python3.withPackages(python: [
       python.pillow
     ]))
-    nodePackages.lv_font_conv
+    lv_font_conv
   ] ++ extraPkgs;
 }

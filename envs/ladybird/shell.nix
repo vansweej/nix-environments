@@ -19,7 +19,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     ccache
     clang-tools
-    nodePackages.prettier
+    prettier
     icu78
   ] ++ extraPkgs;
 
